@@ -1,2 +1,3 @@
 GET     /lines                            controllers.LineController.getAllLines
 GET     /status/:line                     controllers.DelayController.getStatus(line:String)
+GET     /schedule                         controllers.ScheduleController.getSchedule(scheduleRequest:model.ScheduleRequest)

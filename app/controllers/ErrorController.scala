@@ -8,7 +8,7 @@ import play.api.mvc.{RequestHeader, Result, Results}
 import play.api.routing.Router
 import play.api.{Configuration, Environment, OptionalSourceMapper}
 
-import exception.LineNotFoundException
+import exception.NotFoundError
 import javax.inject.{Inject, Provider, Singleton}
 import model.ServerError
 
@@ -20,7 +20,7 @@ class ErrorController @Inject()(env: Environment,
                                ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     val error = exception match {
-      case e: LineNotFoundException => Results.NotFound(toJsonErrorMessage(e.getMessage, e.getClass.getName))
+      case e: NotFoundError => Results.NotFound(toJsonErrorMessage(e.getMessage, e.getClass.getName))
 
       case e: Throwable => Results.InternalServerError(toJsonErrorMessage(s"Internal error $e", e.getClass.getName))
     }

@@ -18,13 +18,20 @@ class LineService @Inject()(fileReaderService: FileReaderService)(implicit ec: E
     }
   }
 
+  def loadLineById(id: Long): Future[Line] = {
+    findLineById(id) map {
+      case Some(l) => l
+      case None    => throw LineNotFoundException(s"ID[$id]")
+    }
+  }
+
   private def findLineByName(name: String): Future[Option[Line]] = {
     getAllLines().map { lines =>
       lines.find(_.name.equals(name))
     }
   }
 
-  def findLineById(id: Long): Future[Option[Line]] = {
+  private def findLineById(id: Long): Future[Option[Line]] = {
     getAllLines().map { lines =>
       lines.find(_.id.equals(id))
     }
