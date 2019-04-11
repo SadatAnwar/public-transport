@@ -23,6 +23,28 @@ endpoints for the first time will trigger compilation of the code and once done 
 ## Challenges: 
 - Find a vehicle for a given time and X & Y coordinates
 
+  - `localhost:8081/schedule?x=1&y=1&time=10:00:00` will return 
+  ```json
+  {
+      "line": {
+          "id": 0,
+          "name": "M4"
+      },
+      "stop": {
+          "id": 0,
+          "x": 1,
+          "y": 1
+      },
+      "time": "10:00:00",
+      "status": {
+          "onTime": false,
+          "amount": 1
+      }
+  }
+  ```
+  indicating the route line M4 is scheduled to arrive at 10:00:00 but along with its status i.e not on time and delay of 1
+  
+
 - Return the vehicle arriving next at a given stop
 
 - Indicate if a given line is currently delayed

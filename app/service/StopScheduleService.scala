@@ -6,14 +6,20 @@ import javax.inject.{Inject, Singleton}
 import model.StopSchedule
 
 @Singleton
-class StopScheduleService @Inject()(fileReaderService: FileReaderService, lineService: LineService, stopsService: StopsService)(implicit ec: ExecutionContext) {
+class StopScheduleService @Inject()(fileReaderService: FileReaderService, lineService: LineService, stopsService: StopsService, delayService: DelayService)(implicit ec: ExecutionContext) {
 
   private val fileName = "data/times.csv"
 
-  def findVehicleAt(x: Double, y: Double, time: String): Future[Option[StopSchedule]] = {
+  def findVehicleAt(x: Double, y: Double, time: String): Future[StopSchedule] = {
     stopsService.loadStopByCoordinates(x, y).flatMap(stop => {
-      readFromCsv().map(stopSchedules => stopSchedules.find(sc => sc.stop.equals(stop) && sc.time.equals(time)))
+      readFromCsv().map(stopSchedules => stopSchedules.find(sc => sc.stop.equals(stop) && sc.time.equals(time)).getOrElse(StopSchedule(None, stop, time)))
+    }).flatMap(schedule => {
+      schedule.line match {
+        case Some(line) => delayService.getStatus(line.name).map(s => schedule.copy(status = Some(s)))
+        case None => Future.successful(schedule)
+      }
     })
+
   }
 
   private def readFromCsv(): Future[List[StopSchedule]] = {
@@ -26,7 +32,7 @@ class StopScheduleService @Inject()(fileReaderService: FileReaderService, lineSe
         val time = segments(2)
 
         lineService.loadLineById(lineId).flatMap(l => {
-          stopsService.loadStopById(stopId).map(s => StopSchedule(l, s, time))
+          stopsService.loadStopById(stopId).map(s => StopSchedule(Some(l), s, time))
         })
       })
       Future.sequence(futureLines)
